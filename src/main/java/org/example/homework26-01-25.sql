@@ -57,3 +57,62 @@ FROM book
      book_author ON book.id = book_author.book_id
          JOIN
      author ON book_author.author_id = author.id;
+
+ALTER TABLE book
+    ADD COLUMN price DOUBLE PRECISION;
+
+UPDATE book
+SET price = 1200
+WHERE id = 1;
+
+UPDATE book
+SET price = 1500
+WHERE id = 2;
+
+UPDATE book
+SET price = 1400
+WHERE id = 3;
+
+INSERT INTO book(title, year, publisher_id, price)
+VALUES ('Федя', 2025, 1, 4000);
+INSERT INTO book_author(book_id, author_id)
+VALUES (4, 1);
+
+SELECT AVG(price) AS average_price,
+       MIN(price) AS min_price,
+       MAX(price) AS max_price
+FROM book;
+
+SELECT a.name, COUNT(b_a.book_id) AS total_book
+FROM author a
+         JOIN book_author b_a ON a.id = b_a.author_id
+GROUP BY a.name
+ORDER BY name;
+
+SELECT a.name,
+       COUNT(b.id)  AS total_book,
+       AVG(b.price) AS average_price
+FROM author a
+         JOIN book_author b_a ON a.id = b_a.author_id
+         JOIN book b ON b_a.book_id = b.id
+GROUP BY a.name
+ORDER BY name;
+
+INSERT INTO author(name)
+VALUES ('Юришин'),
+       ('Шестаков'),
+       ('Жиров');
+
+SELECT a.name
+FROM author a
+         LEFT JOIN book_author b_a ON a.id = b_a.author_id
+         LEFT JOIN book b ON b_a.book_id = b.id
+WHERE book_id IS NULL
+ORDER BY name;
+
+SELECT a.name
+FROM author a
+         LEFT JOIN book_author b_a ON a.id = b_a.author_id
+GROUP BY a.name
+HAVING COUNT(b_a.book_id) = 0
+ORDER BY name;

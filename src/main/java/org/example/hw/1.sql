@@ -68,3 +68,86 @@ FROM book
      book_author ON book.id = book_author.book_id
          JOIN
      author ON book_author.author_id = author.id;
+
+ALTER TABLE book
+    ADD COLUMN pages_amount INT;
+UPDATE book
+SET pages_amount = CASE
+                       WHEN id = 1 THEN 500
+                       WHEN id = 2 THEN 700
+                       WHEN id = 3 THEN 1000
+                       WHEN id = 4 THEN 2000
+    END
+WHERE id IN (1, 2, 3, 4);
+
+SELECT b.title FROM book b
+WHERE b.pages_amount > (SELECT AVG(pages_amount) FROM book);
+
+ALTER TABLE book
+    ADD COLUMN amount INT,
+ADD COLUMN year_publication INT;
+
+UPDATE book
+SET amount = CASE
+                 WHEN id = 1 THEN 7
+                 WHEN id = 2 THEN 9
+                 WHEN id = 3 THEN 15
+                 WHEN id = 4 THEN 1
+    END
+WHERE id IN (1, 2, 3, 4);
+
+UPDATE book
+SET year_publication = CASE
+                           WHEN id = 1 THEN 2020
+                           WHEN id = 2 THEN 2016
+                           WHEN id = 3 THEN 2025
+                           WHEN id = 4 THEN 2008
+    END
+WHERE id IN (1, 2, 3, 4);
+
+SELECT * FROM book
+WHERE year_publication = (SELECT MAX(year_publication) FROM book);
+
+SELECT * FROM book
+WHERE year_publication IN (
+    SELECT DISTINCT year_publication FROM book
+    ORDER BY year_publication DESC
+    LIMIT 2
+    );
+
+SELECT *
+FROM   (SELECT title,SUM(amount*price) AS total
+        FROM book
+        GROUP BY title)
+WHERE total > 10000
+ORDER BY total;
+
+SELECT title, SUM(amount * price) AS total
+FROM book
+GROUP BY title
+HAVING SUM(amount * price) > 10000
+ORDER BY total;
+
+WITH book_total AS(
+    SELECT title , SUM(amount * price) AS total
+    FROM book
+    GROUP BY title
+)
+SELECT *
+FROM book_total
+WHERE total > 10000
+ORDER BY total;
+
+SELECT
+    CONCAT(book.title, ' ', book.year_publication, ' ', author.name) AS book_info,
+    CASE
+        WHEN book.year_publication >=  2020 THEN 'Свежие издания'
+        WHEN book.year_publication BETWEEN 2010 AND 2019 THEN 'Всё ещё актуальны'
+        ELSE 'Публиковались давно'
+        END AS Статус
+FROM book
+         JOIN
+     book_author ON book.id = book_author.book_id
+         JOIN
+     author ON book_author.author_id = author.id
+ORDER BY book.year_publication DESC;
